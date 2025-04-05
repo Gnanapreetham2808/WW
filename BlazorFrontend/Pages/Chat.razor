@@ -1,0 +1,45 @@
+@inject HttpClient Http
+@using System.Net.Http.Json // Add this line
+
+<input @bind="userMessage" placeholder="Type your message" />
+<button @onclick="SendMessage">Send</button>
+<p>@botResponse</p>
+
+@code {
+    private string userMessage = string.Empty;
+    private string botResponse = string.Empty;
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(userMessage))
+        {
+            botResponse = "Please enter a message.";
+            return;
+        }
+
+        try
+        {
+            var requestData = new { input = userMessage };
+            var response = await Http.PostAsJsonAsync("http://127.0.0.1:8000/generate-response", requestData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<OutputModel>();
+                botResponse = result?.Output ?? "No response received.";
+            }
+            else
+            {
+                botResponse = $"Error: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            botResponse = $"Error: {ex.Message}";
+        }
+    }
+
+    private class OutputModel
+    {
+        public string Output { get; set; } = string.Empty;
+    }
+}

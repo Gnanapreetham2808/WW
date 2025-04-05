@@ -1,0 +1,15 @@
+﻿@inject ApiService ApiService
+
+@code {
+    private string userMessage = "";
+    private string botResponse = "";
+
+    private async Task SendMessage()
+    {
+        botResponse = await ApiService.GenerateResponse(userMessage);
+    }
+}
+
+<input @bind="userMessage" placeholder="Type your message" />
+<button @onclick="SendMessage">Send</button>
+<p>@botResponse</p>
